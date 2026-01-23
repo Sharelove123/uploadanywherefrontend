@@ -56,10 +56,17 @@ export default function RegisterPage() {
 
         try {
             // 1. Create tenant
+            const mainDomain = process.env.NEXT_PUBLIC_MAIN_DOMAIN || 'localhost:3000';
+            const protocol = window.location.protocol; // http: or https:
+
             const tenantResponse = await api.post("/tenants/register/", {
                 name: formData.companyName,
                 tenant_type: "company",
-                domain_url: `${formData.companySlug}.localhost`,
+                domain_url: `${formData.companySlug}.${mainDomain.split(':')[0]}`, // Backend expects domain without port usually, or handle match
+                // Actually, backend needs full domain to match request Host header? 
+                // If backend stores "slug.main.com", then request host "slug.main.com" matches.
+                // If mainDomain is "localhost:3000", we want "slug.localhost".
+
                 owner_username: formData.username,
                 owner_email: formData.email,
                 password: formData.password,
@@ -69,10 +76,10 @@ export default function RegisterPage() {
             // This would require the backend to support user creation during tenant registration
             // For now, we redirect to the new subdomain login
 
-            const domain = tenantResponse.data.domain || `${formData.companySlug}.localhost:3000`;
+            const domain = tenantResponse.data.domain || `${formData.companySlug}.${mainDomain}`;
 
             // Redirect to new tenant login (User is already created)
-            window.location.href = `http://${domain}/login?registered=true`;
+            window.location.href = `${protocol}//${domain}/login?registered=true`;
         } catch (err: any) {
             console.error(err);
             const msg = err.response?.data?.message || err.response?.data?.detail || "Registration failed.";

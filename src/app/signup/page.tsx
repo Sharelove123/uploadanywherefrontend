@@ -283,7 +283,7 @@ function SignupContent() {
                     </Button>
                     <div className="text-center text-sm text-muted-foreground">
                         Wrong workspace?{" "}
-                        <a href="http://localhost:3000/register" className="underline hover:text-primary">
+                        <a href={`http://${process.env.NEXT_PUBLIC_MAIN_DOMAIN || 'localhost:3000'}/register`} className="underline hover:text-primary">
                             Create your own
                         </a>
                     </div>
