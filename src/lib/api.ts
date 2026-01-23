@@ -11,8 +11,11 @@ if (typeof window !== 'undefined') {
     const protocol = window.location.protocol;
 
     // If we are on a subdomain (and it's not localhost directly), point to that subdomain's backend
-    // e.g. rachit.localhost:3000 -> http://rachit.localhost:8000/api
-    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+    // BUT only for local development where ports match.
+    // In production, we trust NEXT_PUBLIC_API_URL or separate logic.
+    const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.localhost');
+
+    if (isLocal && hostname !== 'localhost' && hostname !== '127.0.0.1') {
         API_URL = `${protocol}//${hostname}:${port}/api`;
     }
 }
