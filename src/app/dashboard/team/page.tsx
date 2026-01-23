@@ -46,8 +46,10 @@ export default function TeamPage() {
     const [inviteEmail, setInviteEmail] = useState('');
     const [inviteRole, setInviteRole] = useState('member');
     const [sendingInvite, setSendingInvite] = useState(false);
+    const [origin, setOrigin] = useState('');
 
     useEffect(() => {
+        setOrigin(window.location.origin);
         fetchData();
     }, []);
 
@@ -253,7 +255,7 @@ export default function TeamPage() {
                             <div className="mt-4 p-4 bg-muted/50 rounded-lg text-sm text-muted-foreground">
                                 <p className="flex items-center gap-2">
                                     <Shield className="h-4 w-4" />
-                                    Invite link format: <code>{window.location.origin}/signup?token=...</code>
+                                    Invite link format: <code>{origin}/signup?token=...</code>
                                 </p>
                             </div>
                         </CardContent>
