@@ -56,7 +56,9 @@ export default function RegisterPage() {
 
         try {
             // 1. Create tenant
-            const mainDomain = process.env.NEXT_PUBLIC_MAIN_DOMAIN || 'localhost:3000';
+            // Robustly handle the env var, removing protocol if user accidentally included it
+            const rawMainDomain = process.env.NEXT_PUBLIC_MAIN_DOMAIN || 'localhost:3000';
+            const mainDomain = rawMainDomain.replace(/^https?:\/\//, '').replace(/\/$/, '');
             const protocol = window.location.protocol; // http: or https:
 
             const tenantResponse = await api.post("/tenants/register/", {
