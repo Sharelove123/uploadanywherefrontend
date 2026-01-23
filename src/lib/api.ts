@@ -28,6 +28,18 @@ const api = axios.create({
     withCredentials: true, // Required for cookies/sessions across subdomains
 });
 
+// Request interceptor to add the Tenant Domain header
+api.interceptors.request.use((config) => {
+    if (typeof window !== 'undefined') {
+        const hostname = window.location.hostname;
+        // Don't send for localhost (backend handles logic, or expects standard Host header for public)
+        // We mainly need it when on deployment (e.g. tenant.vercel.app)
+        config.headers['X-Tenant-Domain'] = hostname;
+    }
+    return config;
+});
+
+
 export const setAuthToken = (token: string) => {
     if (token) {
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
