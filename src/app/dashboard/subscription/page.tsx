@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { Check, Loader2, Crown } from "lucide-react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ interface Plan {
     }
 }
 
-export default function SubscriptionPage() {
+function SubscriptionContent() {
     const [plans, setPlans] = useState<Plan[]>([]);
     const [currentPlan, setCurrentPlan] = useState<string>('free');
     const [isLoading, setIsLoading] = useState(true);
@@ -131,10 +131,10 @@ export default function SubscriptionPage() {
                     <Card
                         key={plan.id}
                         className={`relative ${isCurrentPlan(plan)
-                                ? "border-green-500 shadow-lg ring-2 ring-green-500/20"
-                                : plan.name === 'pro'
-                                    ? "border-primary shadow-lg"
-                                    : ""
+                            ? "border-green-500 shadow-lg ring-2 ring-green-500/20"
+                            : plan.name === 'pro'
+                                ? "border-primary shadow-lg"
+                                : ""
                             }`}
                     >
                         {isCurrentPlan(plan) && (
@@ -188,6 +188,15 @@ export default function SubscriptionPage() {
                 ))}
             </div>
         </div>
+    );
+
+}
+
+export default function SubscriptionPage() {
+    return (
+        <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
+            <SubscriptionContent />
+        </Suspense>
     );
 }
 
