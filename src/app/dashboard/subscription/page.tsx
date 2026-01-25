@@ -107,7 +107,11 @@ function SubscriptionContent() {
         }
     };
 
-    const isCurrentPlan = (plan: Plan) => plan.name.toLowerCase() === currentPlan.toLowerCase();
+    const isCurrentPlan = (plan: Plan) => {
+        const planName = plan.name || '';
+        const userPlan = currentPlan || '';
+        return planName.toLowerCase().trim() === userPlan.toLowerCase().trim();
+    };
 
     return (
         <div className="space-y-8">
