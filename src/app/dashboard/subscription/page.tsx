@@ -130,6 +130,15 @@ function SubscriptionContent() {
                 )}
             </div>
 
+            {/* DEBUG INFO - REMOVE LATER */}
+            <div className="p-4 bg-gray-100 text-xs font-mono rounded border border-gray-300">
+                <p>DEBUG:</p>
+                <p>User Email: {user?.email}</p>
+                <p>User Tier: {user?.subscription_tier}</p>
+                <p>Current Plan State: {currentPlan}</p>
+                <p>Plan Comparison: {plans.map(p => `${p.name}: ${isCurrentPlan(p)}`).join(', ')}</p>
+            </div>
+
             {searchParams.get('success') && (
                 <div className="bg-green-500/10 text-green-600 p-4 rounded-md border border-green-500/20 mb-6 flex items-center gap-2">
                     <Check className="h-5 w-5" />
