@@ -33,7 +33,7 @@ export default function DashboardPage() {
             try {
                 const [sourcesRes, userRes] = await Promise.all([
                     api.get('/repurposer/sources/'),
-                    api.get('/users/me/')
+                    api.get('/users/profile/')
                 ]);
                 setSources(sourcesRes.data.results || sourcesRes.data || []);
                 setUserData(userRes.data);
