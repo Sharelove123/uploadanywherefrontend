@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import api from "@/lib/api";
 import {
     LayoutDashboard,
     PenTool,
@@ -54,6 +55,17 @@ const sidebarItems = [
 
 export function Sidebar() {
     const pathname = usePathname();
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        try {
+            await api.post("/auth/logout/");
+        } catch (err) {
+            console.error("Logout failed", err);
+        } finally {
+            router.push("/login");
+        }
+    };
 
     return (
         <div className="flex h-screen w-64 flex-col border-r bg-card text-card-foreground">
@@ -88,7 +100,10 @@ export function Sidebar() {
             </div>
 
             <div className="border-t p-4">
-                <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10">
+                <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+                >
                     <LogOut className="h-4 w-4" />
                     Sign Out
                 </button>

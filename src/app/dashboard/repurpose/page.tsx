@@ -208,6 +208,8 @@ export default function RepurposePage() {
                                 {[
                                     { id: "linkedin", label: "LinkedIn Post", desc: "Professional updates & slides" },
                                     { id: "twitter", label: "Twitter Thread", desc: "Engaging short-form thread" },
+                                    { id: "youtube", label: "YouTube Video", desc: "Video description and hook" },
+                                    { id: "instagram", label: "Instagram Reel", desc: "Caption and hashtags" },
                                 ].map((platform) => (
                                     <div
                                         key={platform.id}

@@ -12,9 +12,7 @@ export default function SocialAccountsPage() {
 
     useEffect(() => {
         // Fetch connected accounts
-        // api.get('/social/').then(res => setConnectedAccounts(res.data));
-        // Mocking for now as the List endpoint wasn't fully implemented in the view snippets above
-        // Assuming we will implement list endpoint
+        api.get('/social/').then(res => setConnectedAccounts(res.data)).catch(err => console.error(err));
     }, []);
 
     const handleConnect = async (platform: string) => {
@@ -25,17 +23,25 @@ export default function SocialAccountsPage() {
             window.location.href = response.data.url;
 
             // console.log(`Call POST /api/social/connect/${platform}/`);
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            alert("Failed to initiate connection");
+            const msg = error.response?.data?.error || "Failed to initiate connection";
+            alert(msg);
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleDisconnect = async (platform: string) => {
-        // Implement disconnect logic
-        alert("Disconnected!");
+        if (!confirm(`Are you sure you want to disconnect ${platform}?`)) return;
+
+        try {
+            await api.post(`/social/disconnect/${platform}/`);
+            setConnectedAccounts(prev => prev.filter(acc => acc.platform !== platform));
+        } catch (error) {
+            console.error("Disconnect failed", error);
+            alert("Failed to disconnect account");
+        }
     };
 
     const accounts = [

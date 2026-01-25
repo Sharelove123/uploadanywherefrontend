@@ -36,8 +36,42 @@ export default function LoginPage() {
         setIsLoading(true);
         setError("");
 
+        const { username, password } = data;
+        const inputLogin = username; // Field is named "username" in schema but holds email or username
+
         try {
-            const response = await api.post('/auth/login/', data);
+            // 1. Check if user belongs to a tenant (Redirection logic)
+            // Only applicable if input looks like an email using simple check
+            try {
+                const lookupRes = await api.post('/users/tenant-lookup/', { email: inputLogin });
+                if (lookupRes.data.found && lookupRes.data.tenant_domain) {
+                    const tenantDomain = lookupRes.data.tenant_domain;
+                    // Store tenant domain for subsequent requests
+                    localStorage.setItem('tenant_domain', tenantDomain);
+                    // Force update headers immediately for the next request
+                    api.defaults.headers.common['X-Tenant-Domain'] = tenantDomain;
+                    console.log("Tenant lookup success. Domain set to:", tenantDomain);
+                } else {
+                    console.warn("Tenant lookup returned no domain or found=false");
+                }
+            } catch (err: any) {
+                console.error("Lookup failed", err);
+                // Don't block login, might be public user or lookup failed
+            }
+
+            // 2. Normal Login
+            // dj-rest-auth handles "username" field as either username or email based on backend config
+            // We should NOT force "email" key unless we are sure it's valid, otherwise backend serializer might fail validation
+            const payload: any = {
+                password,
+                username: inputLogin
+            };
+
+            if (inputLogin.includes('@')) {
+                payload.email = inputLogin;
+            }
+
+            const response = await api.post('/auth/login/', payload);
 
             // Standard dj-rest-auth or simplejwt response
             const token = response.data.access_token || response.data.key || response.data.access;
@@ -89,10 +123,10 @@ export default function LoginPage() {
                             <form onSubmit={handleSubmit(onSubmit)}>
                                 <div className="grid gap-4">
                                     <div className="grid gap-2">
-                                        <Label htmlFor="username">Username</Label>
+                                        <Label htmlFor="username">Email or Username</Label>
                                         <Input
                                             id="username"
-                                            placeholder="admin"
+                                            placeholder="name@example.com or username"
                                             type="text"
                                             autoCapitalize="none"
                                             autoCorrect="off"

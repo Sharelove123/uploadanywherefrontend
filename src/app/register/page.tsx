@@ -78,10 +78,13 @@ export default function RegisterPage() {
             // This would require the backend to support user creation during tenant registration
             // For now, we redirect to the new subdomain login
 
-            const domain = tenantResponse.data.domain || `${formData.companySlug}.${mainDomain}`;
+            const domain = tenantResponse.data.domain || `${formData.companySlug}.${mainDomain.split(':')[0]}`;
 
-            // Redirect to new tenant login (User is already created)
-            window.location.href = `${protocol}//${domain}/login?registered=true`;
+            // Store new tenant domain so login page knows where to go
+            localStorage.setItem('tenant_domain', domain);
+
+            // Redirect to login on the SAME domain (localhost)
+            router.push('/login?registered=true');
         } catch (err: any) {
             console.error(err);
             const msg = err.response?.data?.message || err.response?.data?.detail || "Registration failed.";
