@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Linkedin, Twitter, Youtube, Instagram, CheckCircle2, AlertCircle } from "lucide-react";
+import { Linkedin, Twitter, Youtube, Instagram, Facebook, CheckCircle2, AlertCircle } from "lucide-react";
 import api from "@/lib/api";
 
 export default function SocialAccountsPage() {
@@ -68,6 +68,12 @@ export default function SocialAccountsPage() {
             name: "Instagram",
             icon: Instagram,
             description: "Post images and reels with captions.",
+        },
+        {
+            id: "facebook",
+            name: "Facebook",
+            icon: Facebook,
+            description: "Post to your Facebook Page.",
         },
     ];
 

@@ -17,7 +17,7 @@ import api from "@/lib/api";
 // Re-using Post interface locally or could export from a types file
 export interface Post {
     id: number;
-    platform: "linkedin" | "twitter" | "instagram" | "youtube";
+    platform: "linkedin" | "twitter" | "instagram" | "youtube" | "facebook";
     platform_display: string;
     status: "pending" | "ready" | "published" | "failed";
     status_display: string;

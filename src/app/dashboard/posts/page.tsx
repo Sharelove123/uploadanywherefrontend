@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
-import { Loader2, ExternalLink, Linkedin, Twitter, MoreVertical, FileText, Youtube, ImageIcon, Instagram } from "lucide-react";
+import { Loader2, ExternalLink, Linkedin, Twitter, MoreVertical, FileText, Youtube, ImageIcon, Instagram, Facebook } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +21,7 @@ import { EditPostDialog } from "@/components/posts/EditPostDialog";
 
 interface Post {
     id: number;
-    platform: "linkedin" | "twitter" | "instagram" | "youtube";
+    platform: "linkedin" | "twitter" | "instagram" | "youtube" | "facebook";
     platform_display: string;
     status: "pending" | "ready" | "published" | "failed";
     status_display: string;
@@ -173,6 +173,7 @@ export default function PostsPage() {
                                                 {post.platform === 'twitter' && <Twitter className="h-5 w-5 text-sky-500" />}
                                                 {post.platform === 'youtube' && <Youtube className="h-5 w-5 text-red-500" />}
                                                 {post.platform === 'instagram' && <Instagram className="h-5 w-5 text-pink-600" />}
+                                                {post.platform === 'facebook' && <Facebook className="h-5 w-5 text-blue-600" />}
                                             </div>
                                             <div className="flex-1 space-y-2">
                                                 <div className="flex items-center justify-between">

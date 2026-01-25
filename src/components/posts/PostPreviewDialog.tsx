@@ -28,7 +28,7 @@ import { getMediaUrl } from "@/lib/utils";
 
 export interface Post {
     id: number;
-    platform: "linkedin" | "twitter" | "instagram" | "youtube";
+    platform: "linkedin" | "twitter" | "instagram" | "youtube" | "facebook";
     platform_display: string;
     status: "pending" | "ready" | "published" | "failed"; // Added status
     status_display?: string; // Added optional
