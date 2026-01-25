@@ -33,10 +33,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             const response = await api.get("/users/profile/");
             setUser(response.data);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to fetch user profile", error);
-            // If fetching profile fails (e.g., 401), we should log out
-            logout();
+            // Only logout on auth errors (401, 403), not on network errors
+            const status = error.response?.status;
+            if (status === 401 || status === 403) {
+                logout();
+            }
         } finally {
             setIsLoading(false);
         }
