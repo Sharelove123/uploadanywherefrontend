@@ -15,6 +15,7 @@ import api from "@/lib/api";
 import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
+    projectName: z.string().min(1, "Project name is required").max(100),
     sourceUrl: z.string().optional(),
     rawText: z.string().optional(),
     sourceType: z.enum(["youtube", "blog", "text", "file"]),
@@ -40,6 +41,7 @@ export default function RepurposePage() {
     const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
+            projectName: "",
             sourceType: "youtube",
             platforms: ["linkedin"],
         },
@@ -66,9 +68,7 @@ export default function RepurposePage() {
                 platforms: data.platforms,
                 source_url: (data.sourceType === 'youtube' || data.sourceType === 'blog') ? data.sourceUrl : undefined,
                 raw_text: data.sourceType === 'text' ? data.rawText : undefined,
-                // Map frontend type to backend checks if needed, but backend logic infers from URL too.
-                // We pass title? Not in form yet.
-                title: "Untitled Project"
+                title: data.projectName
             };
 
             // Ensure authentication token exists (basic check)
@@ -115,6 +115,17 @@ export default function RepurposePage() {
                             <CardDescription>What content do you want to repurpose?</CardDescription>
                         </CardHeader>
                         <CardContent>
+                            {/* Project Name Field */}
+                            <div className="space-y-2 mb-6">
+                                <Label htmlFor="project-name">Project Name</Label>
+                                <Input
+                                    id="project-name"
+                                    placeholder="My Awesome Content"
+                                    {...register("projectName")}
+                                />
+                                {errors.projectName && <p className="text-sm text-destructive">{errors.projectName.message}</p>}
+                            </div>
+
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                                 <Button
                                     variant={activeTab === "youtube" ? "default" : "outline"}
