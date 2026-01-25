@@ -28,7 +28,7 @@ function SubscriptionContent() {
     const [isLoading, setIsLoading] = useState(true);
     const [isCheckoutLoading, setIsCheckoutLoading] = useState<number | null>(null);
     const searchParams = useSearchParams();
-    const { user } = useAuth();
+    const { user, checkAuth } = useAuth();
 
     useEffect(() => {
         // Get current plan from user profile
@@ -36,6 +36,13 @@ function SubscriptionContent() {
             setCurrentPlan(user.subscription_tier);
         }
     }, [user]);
+
+    // Refresh user profile on success (to get new plan)
+    useEffect(() => {
+        if (searchParams.get('success')) {
+            checkAuth();
+        }
+    }, [searchParams, checkAuth]);
 
     useEffect(() => {
         // Fetch plans
