@@ -46,6 +46,7 @@ const sidebarItems = [
         href: "/dashboard/subscription",
         icon: CreditCard,
     },
+
     {
         title: "Settings",
         href: "/dashboard/settings",
