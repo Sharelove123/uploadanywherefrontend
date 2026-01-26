@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -10,6 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import api from "@/lib/api";
 import { useRouter } from "next/navigation";
@@ -37,6 +44,21 @@ export default function RepurposePage() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<"youtube" | "blog" | "text" | "file">("youtube");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [brandVoices, setBrandVoices] = useState<{ id: number; name: string; description: string }[]>([]);
+    const [selectedBrandVoice, setSelectedBrandVoice] = useState<string>("");
+
+    // Fetch brand voices on mount
+    useEffect(() => {
+        const fetchBrandVoices = async () => {
+            try {
+                const response = await api.get('/repurposer/brand-voices/');
+                setBrandVoices(response.data.results || response.data || []);
+            } catch (error) {
+                console.error("Failed to fetch brand voices", error);
+            }
+        };
+        fetchBrandVoices();
+    }, []);
 
     const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -68,7 +90,8 @@ export default function RepurposePage() {
                 platforms: data.platforms,
                 source_url: (data.sourceType === 'youtube' || data.sourceType === 'blog') ? data.sourceUrl : undefined,
                 raw_text: data.sourceType === 'text' ? data.rawText : undefined,
-                title: data.projectName
+                title: data.projectName,
+                brand_voice_id: selectedBrandVoice ? parseInt(selectedBrandVoice) : undefined
             };
 
             // Ensure authentication token exists (basic check)
@@ -247,6 +270,33 @@ export default function RepurposePage() {
                                 ))}
                             </div>
                             {errors.platforms && <p className="text-sm text-destructive mt-2">{errors.platforms.message}</p>}
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>3. Brand Voice (Optional)</CardTitle>
+                            <CardDescription>Apply your custom writing style to the generated content.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Select value={selectedBrandVoice} onValueChange={setSelectedBrandVoice}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Default (Professional & Engaging)" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="">Default (Professional & Engaging)</SelectItem>
+                                    {brandVoices.map((voice) => (
+                                        <SelectItem key={voice.id} value={voice.id.toString()}>
+                                            {voice.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {brandVoices.length === 0 && (
+                                <p className="text-xs text-muted-foreground mt-2">
+                                    No custom brand voices yet. Create one in Settings to personalize your content.
+                                </p>
+                            )}
                         </CardContent>
                     </Card>
                 </div>
