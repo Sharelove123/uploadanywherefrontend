@@ -22,6 +22,7 @@ interface BrandVoice {
     id: number;
     name: string;
     description: string;
+    sample_posts?: string;
     created_at: string;
 }
 
@@ -35,6 +36,7 @@ export default function SettingsPage() {
     // Form state
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
+    const [samplePosts, setSamplePosts] = useState("");
 
     useEffect(() => {
         fetchBrandVoices();
@@ -55,6 +57,7 @@ export default function SettingsPage() {
         setEditingVoice(null);
         setName("");
         setDescription("");
+        setSamplePosts("");
         setIsDialogOpen(true);
     };
 
@@ -62,12 +65,19 @@ export default function SettingsPage() {
         setEditingVoice(voice);
         setName(voice.name);
         setDescription(voice.description);
+        // Cast to any because the interface defined locally is incomplete compared to API
+        setSamplePosts((voice as any).sample_posts || "");
         setIsDialogOpen(true);
     };
 
     const handleSave = async () => {
         if (!name.trim()) {
             alert("Please enter a name for the brand voice.");
+            return;
+        }
+
+        if (!samplePosts.trim()) {
+            alert("Please provide sample posts so we can learn your style.");
             return;
         }
 
@@ -78,6 +88,7 @@ export default function SettingsPage() {
                 const response = await api.patch(`/repurposer/brand-voices/${editingVoice.id}/`, {
                     name,
                     description,
+                    sample_posts: samplePosts,
                 });
                 setBrandVoices(prev => prev.map(v => v.id === editingVoice.id ? response.data : v));
             } else {
@@ -85,6 +96,7 @@ export default function SettingsPage() {
                 const response = await api.post('/repurposer/brand-voices/', {
                     name,
                     description,
+                    sample_posts: samplePosts,
                 });
                 setBrandVoices(prev => [...prev, response.data]);
             }
@@ -164,6 +176,19 @@ export default function SettingsPage() {
                                     />
                                     <p className="text-xs text-muted-foreground">
                                         Tip: Be specific! Example: "Write in a friendly, conversational tone. Use short sentences. Include occasional humor. Avoid jargon."
+                                    </p>
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="samplePosts">Sample Posts (Required)</Label>
+                                    <Textarea
+                                        id="samplePosts"
+                                        placeholder="Paste 3-5 examples of posts you like..."
+                                        value={samplePosts}
+                                        onChange={(e) => setSamplePosts(e.target.value)}
+                                        className="h-32"
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        The AI will analyze these to match your style.
                                     </p>
                                 </div>
                             </div>

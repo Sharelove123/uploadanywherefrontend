@@ -25,6 +25,7 @@ const formSchema = z.object({
     projectName: z.string().min(1, "Project name is required").max(100),
     sourceUrl: z.string().optional(),
     rawText: z.string().optional(),
+    userPrompt: z.string().optional(),
     sourceType: z.enum(["youtube", "blog", "text", "file"]),
     platforms: z.array(z.string()).min(1, "Select at least one platform"),
 }).refine(data => {
@@ -91,7 +92,8 @@ export default function RepurposePage() {
                 source_url: (data.sourceType === 'youtube' || data.sourceType === 'blog') ? data.sourceUrl : undefined,
                 raw_text: data.sourceType === 'text' ? data.rawText : undefined,
                 title: data.projectName,
-                brand_voice_id: selectedBrandVoice && selectedBrandVoice !== 'default' ? parseInt(selectedBrandVoice) : undefined
+                user_prompt: data.userPrompt,
+                brand_voice_id: selectedBrandVoice && selectedBrandVoice !== 'default' ? parseInt(selectedBrandVoice) : undefined,
             };
 
             // Ensure authentication token exists (basic check)
@@ -273,7 +275,21 @@ export default function RepurposePage() {
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>3. Brand Voice (Optional)</CardTitle>
+                            <CardTitle>3. Custom Instructions (Optional)</CardTitle>
+                            <CardDescription>Guide the AI with specific instructions (e.g., "Make it funny", "Write like a pirate").</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Textarea
+                                placeholder="E.g., Focus on the second key point and make it sound professional..."
+                                className="min-h-[100px]"
+                                {...register("userPrompt")}
+                            />
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>4. Brand Voice (Optional)</CardTitle>
                             <CardDescription>Apply your custom writing style to the generated content.</CardDescription>
                         </CardHeader>
                         <CardContent>
