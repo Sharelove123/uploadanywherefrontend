@@ -17,7 +17,7 @@ import api from "@/lib/api";
 // Re-using Post interface locally or could export from a types file
 export interface Post {
     id: number;
-    platform: "linkedin" | "twitter" | "instagram" | "youtube" | "facebook";
+    platform: "linkedin" | "twitter" | "youtube";
     platform_display: string;
     status: "pending" | "ready" | "published" | "failed";
     status_display: string;
@@ -90,7 +90,6 @@ export function EditPostDialog({ open, onOpenChange, post, onPostUpdated }: Edit
     if (!post) return null;
 
     const isYouTube = post.platform === 'youtube';
-    const isInstagram = post.platform === 'instagram';
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -114,7 +113,7 @@ export function EditPostDialog({ open, onOpenChange, post, onPostUpdated }: Edit
 
                     <div className="grid gap-2">
                         <Label htmlFor="content">
-                            {isYouTube ? "Video Description" : isInstagram ? "Caption" : "Post Content"}
+                            {isYouTube ? "Video Description" : "Post Content"}
                         </Label>
                         <Textarea
                             id="content"
@@ -126,13 +125,13 @@ export function EditPostDialog({ open, onOpenChange, post, onPostUpdated }: Edit
 
                     <div className="grid gap-2">
                         <Label htmlFor="media">
-                            {isYouTube ? "Video File" : isInstagram ? "Image" : "Media Attachment"}
+                            {isYouTube ? "Video File" : "Media Attachment"}
                         </Label>
                         <div className="flex items-center gap-4">
                             <Input
                                 id="media"
                                 type="file"
-                                accept={isYouTube ? "video/*" : isInstagram ? "image/*" : "image/*,video/*"}
+                                accept={isYouTube ? "video/*" : "image/*,video/*"}
                                 onChange={handleFileChange}
                                 className="hidden"
                             />
