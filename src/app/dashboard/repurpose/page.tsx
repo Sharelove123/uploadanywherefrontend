@@ -91,7 +91,7 @@ export default function RepurposePage() {
                 source_url: (data.sourceType === 'youtube' || data.sourceType === 'blog') ? data.sourceUrl : undefined,
                 raw_text: data.sourceType === 'text' ? data.rawText : undefined,
                 title: data.projectName,
-                brand_voice_id: selectedBrandVoice ? parseInt(selectedBrandVoice) : undefined
+                brand_voice_id: selectedBrandVoice && selectedBrandVoice !== 'default' ? parseInt(selectedBrandVoice) : undefined
             };
 
             // Ensure authentication token exists (basic check)
@@ -282,7 +282,7 @@ export default function RepurposePage() {
                                     <SelectValue placeholder="Default (Professional & Engaging)" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">Default (Professional & Engaging)</SelectItem>
+                                    <SelectItem value="default">Default (Professional & Engaging)</SelectItem>
                                     {brandVoices.map((voice) => (
                                         <SelectItem key={voice.id} value={voice.id.toString()}>
                                             {voice.name}
