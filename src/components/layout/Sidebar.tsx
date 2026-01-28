@@ -13,6 +13,7 @@ import {
     LogOut,
     Sparkles,
     Users,
+    Clock,
 } from "lucide-react";
 
 const sidebarItems = [
@@ -35,6 +36,11 @@ const sidebarItems = [
         title: "My Posts",
         href: "/dashboard/posts",
         icon: PenTool,
+    },
+    {
+        title: "Schedule",
+        href: "/dashboard/schedule",
+        icon: Clock,
     },
     {
         title: "Social Accounts",

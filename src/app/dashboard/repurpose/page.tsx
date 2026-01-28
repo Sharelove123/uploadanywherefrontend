@@ -47,6 +47,40 @@ export default function RepurposePage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [brandVoices, setBrandVoices] = useState<{ id: number; name: string; description: string }[]>([]);
     const [selectedBrandVoice, setSelectedBrandVoice] = useState<string>("");
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [serverWakingUp, setServerWakingUp] = useState(false);
+
+    // Listen for server waking up events
+    useEffect(() => {
+        const handleServerWakingUp = () => setServerWakingUp(true);
+        const handleServerReady = () => setServerWakingUp(false);
+        window.addEventListener('server-waking-up', handleServerWakingUp);
+        return () => window.removeEventListener('server-waking-up', handleServerWakingUp);
+    }, []);
+
+    // File handling functions
+    const handleFileSelect = (file: File | null) => {
+        if (file) {
+            const validTypes = ['application/pdf', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            if (!validTypes.includes(file.type)) {
+                alert('Please upload a PDF, TXT, or DOCX file');
+                return;
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size must be less than 10MB');
+                return;
+            }
+            setSelectedFile(file);
+        }
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files[0];
+        handleFileSelect(file);
+    };
 
     // Fetch brand voices on mount
     useEffect(() => {
@@ -87,25 +121,39 @@ export default function RepurposePage() {
         try {
             console.log("Internal Submitting:", data);
 
-            const payload = {
-                platforms: data.platforms,
-                source_url: (data.sourceType === 'youtube' || data.sourceType === 'blog') ? data.sourceUrl : undefined,
-                raw_text: data.sourceType === 'text' ? data.rawText : undefined,
-                title: data.projectName,
-                user_prompt: data.userPrompt,
-                brand_voice_id: selectedBrandVoice && selectedBrandVoice !== 'default' ? parseInt(selectedBrandVoice) : undefined,
-            };
-
             // Ensure authentication token exists (basic check)
             const token = localStorage.getItem('token');
             if (!token) {
                 alert("You must be logged in to repurpose content.");
                 router.push('/login');
-                // Mock for demo if no login page yet:
-                // api.defaults.headers.common['Authorization'] = `Bearer <OPTIONAL_HARDCODED_TOKEN_FOR_DEV>`;
+                return;
             }
 
-            const response = await api.post('/repurposer/repurpose/', payload);
+            // Use FormData for file uploads, regular JSON otherwise
+            let response;
+            if (data.sourceType === 'file' && selectedFile) {
+                const formData = new FormData();
+                formData.append('source_file', selectedFile);
+                formData.append('platforms', JSON.stringify(data.platforms));
+                formData.append('title', data.projectName);
+                if (data.userPrompt) formData.append('user_prompt', data.userPrompt);
+                if (selectedBrandVoice && selectedBrandVoice !== 'default') {
+                    formData.append('brand_voice_id', selectedBrandVoice);
+                }
+                response = await api.post('/repurposer/repurpose/', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+            } else {
+                const payload = {
+                    platforms: data.platforms,
+                    source_url: (data.sourceType === 'youtube' || data.sourceType === 'blog') ? data.sourceUrl : undefined,
+                    raw_text: data.sourceType === 'text' ? data.rawText : undefined,
+                    title: data.projectName,
+                    user_prompt: data.userPrompt,
+                    brand_voice_id: selectedBrandVoice && selectedBrandVoice !== 'default' ? parseInt(selectedBrandVoice) : undefined,
+                };
+                response = await api.post('/repurposer/repurpose/', payload);
+            }
             console.log("Success:", response.data);
             alert("Content repurposed successfully! Redirecting to posts...");
             router.push('/dashboard/posts');
@@ -224,10 +272,44 @@ export default function RepurposePage() {
                                     </div>
                                 )}
                                 {activeTab === "file" && (
-                                    <div className="border-2 border-dashed rounded-lg p-12 flex flex-col items-center justify-center text-center text-muted-foreground hover:bg-muted/50 transition-colors cursor-pointer">
-                                        <Upload className="h-8 w-8 mb-4" />
-                                        <p className="text-sm font-medium">Click to upload or drag and drop</p>
-                                        <p className="text-xs">PDF, DOCX, TXT up to 10MB</p>
+                                    <div
+                                        className={`border-2 border-dashed rounded-lg p-12 flex flex-col items-center justify-center text-center transition-colors cursor-pointer ${isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/25 hover:bg-muted/50'
+                                            } ${selectedFile ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : ''}`}
+                                        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                                        onDragLeave={() => setIsDragging(false)}
+                                        onDrop={handleDrop}
+                                        onClick={() => document.getElementById('file-input')?.click()}
+                                    >
+                                        <input
+                                            id="file-input"
+                                            type="file"
+                                            accept=".pdf,.txt,.docx"
+                                            className="hidden"
+                                            onChange={(e) => handleFileSelect(e.target.files?.[0] || null)}
+                                        />
+                                        {selectedFile ? (
+                                            <>
+                                                <CheckCircle2 className="h-8 w-8 mb-4 text-green-500" />
+                                                <p className="text-sm font-medium text-foreground">{selectedFile.name}</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                                                </p>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="mt-2"
+                                                    onClick={(e) => { e.stopPropagation(); setSelectedFile(null); }}
+                                                >
+                                                    Remove
+                                                </Button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Upload className="h-8 w-8 mb-4 text-muted-foreground" />
+                                                <p className="text-sm font-medium">Click to upload or drag and drop</p>
+                                                <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 10MB</p>
+                                            </>
+                                        )}
                                     </div>
                                 )}
                             </div>
