@@ -129,6 +129,13 @@ export default function RepurposePage() {
                 return;
             }
 
+            // Validate file is selected when sourceType is file
+            if (data.sourceType === 'file' && !selectedFile) {
+                alert("Please select a file to upload.");
+                setIsSubmitting(false);
+                return;
+            }
+
             // Use FormData for file uploads, regular JSON otherwise
             let response;
             if (data.sourceType === 'file' && selectedFile) {
