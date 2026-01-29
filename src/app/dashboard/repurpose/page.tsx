@@ -147,7 +147,9 @@ export default function RepurposePage() {
                 if (selectedBrandVoice && selectedBrandVoice !== 'default') {
                     formData.append('brand_voice_id', selectedBrandVoice);
                 }
-                response = await api.post('/repurposer/repurpose/', formData);
+                response = await api.post('/repurposer/repurpose/', formData, {
+                    headers: { 'Content-Type': undefined } as any
+                });
             } else {
                 const payload = {
                     platforms: data.platforms,
