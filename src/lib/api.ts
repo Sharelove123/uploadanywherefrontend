@@ -74,7 +74,7 @@ api.interceptors.response.use(
             if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('server-waking-up', {
                     detail: {
-                        message: 'Server is waking up, please wait...',
+                        message: 'Server is waking up and can take up to 50 seconds. Please wait until it is ready.',
                         isRetrying: true
                     }
                 }));

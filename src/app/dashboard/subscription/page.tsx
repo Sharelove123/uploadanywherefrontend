@@ -50,9 +50,23 @@ function SubscriptionContent() {
                 setIsVerifyingCheckout(true);
                 try {
                     if (sessionId) {
-                        await api.post('/payments/verify-checkout-session/', { session_id: sessionId });
+                        const verifyRes = await api.post('/payments/verify-checkout-session/', { session_id: sessionId });
+                        if (verifyRes.data?.subscription_tier) {
+                            setCurrentPlan(verifyRes.data.subscription_tier);
+                        }
                     }
-                    await checkAuth();
+
+                    for (let attempt = 0; attempt < 3; attempt += 1) {
+                        await checkAuth();
+                        const latestTier = localStorage.getItem('last_subscription_tier');
+                        if (latestTier) {
+                            setCurrentPlan(latestTier);
+                            if (latestTier !== 'free') {
+                                break;
+                            }
+                        }
+                        await new Promise((resolve) => setTimeout(resolve, 1200));
+                    }
                 } catch (error) {
                     console.error("Failed to verify checkout session", error);
                 } finally {

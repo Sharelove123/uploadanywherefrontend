@@ -54,7 +54,6 @@ export default function RepurposePage() {
     // Listen for server waking up events
     useEffect(() => {
         const handleServerWakingUp = () => setServerWakingUp(true);
-        const handleServerReady = () => setServerWakingUp(false);
         window.addEventListener('server-waking-up', handleServerWakingUp);
         return () => window.removeEventListener('server-waking-up', handleServerWakingUp);
     }, []);
@@ -189,6 +188,15 @@ export default function RepurposePage() {
             <div className="grid gap-8 lg:grid-cols-3">
                 {/* Main Input Column */}
                 <div className="lg:col-span-2 space-y-8">
+                    {serverWakingUp && (
+                        <Card className="border-amber-300 bg-amber-50">
+                            <CardContent className="pt-6">
+                                <p className="text-sm font-medium text-amber-900">
+                                    The server is waking up. This can take around 50 seconds, so please wait before retrying.
+                                </p>
+                            </CardContent>
+                        </Card>
+                    )}
                     <Card>
                         <CardHeader>
                             <CardTitle>1. Choose Source</CardTitle>

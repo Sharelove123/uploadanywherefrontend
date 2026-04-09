@@ -31,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const logout = useCallback(() => {
         setAuthToken(""); // Clears token from api headers and localStorage
+        localStorage.removeItem("last_subscription_tier");
         setUser(null);
         router.push("/login");
     }, [router]);
@@ -40,6 +41,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Add timestamp to prevent caching
             const response = await api.get(`/users/profile/?t=${new Date().getTime()}`);
             setUser(response.data);
+            if (response.data?.subscription_tier) {
+                localStorage.setItem("last_subscription_tier", response.data.subscription_tier);
+            }
         } catch (error: any) {
             console.error("Failed to fetch user profile", error);
             // Only logout on auth errors (401, 403), not on network errors
