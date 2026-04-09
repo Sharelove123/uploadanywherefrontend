@@ -27,6 +27,7 @@ function SubscriptionContent() {
     const [currentPlan, setCurrentPlan] = useState<string>('free');
     const [isLoading, setIsLoading] = useState(true);
     const [isCheckoutLoading, setIsCheckoutLoading] = useState<number | null>(null);
+    const [isVerifyingCheckout, setIsVerifyingCheckout] = useState(false);
     const [plansError, setPlansError] = useState<string | null>(null);
     const searchParams = useSearchParams();
     const { user, checkAuth } = useAuth();
@@ -43,7 +44,23 @@ function SubscriptionContent() {
     useEffect(() => {
         if (searchParams.get('success') && !refreshedAfterSuccess.current) {
             refreshedAfterSuccess.current = true;
-            checkAuth();
+            const sessionId = searchParams.get('session_id');
+
+            const refreshSubscription = async () => {
+                setIsVerifyingCheckout(true);
+                try {
+                    if (sessionId) {
+                        await api.post('/payments/verify-checkout-session/', { session_id: sessionId });
+                    }
+                    await checkAuth();
+                } catch (error) {
+                    console.error("Failed to verify checkout session", error);
+                } finally {
+                    setIsVerifyingCheckout(false);
+                }
+            };
+
+            refreshSubscription();
         }
     }, [searchParams, checkAuth]);
 
@@ -109,7 +126,7 @@ function SubscriptionContent() {
             {searchParams.get('success') && (
                 <div className="bg-green-500/10 text-green-600 p-4 rounded-md border border-green-500/20 mb-6 flex items-center gap-2">
                     <Check className="h-5 w-5" />
-                    <strong>Success!</strong> Your subscription has been activated.
+                    <strong>Success!</strong> {isVerifyingCheckout ? "Finalizing your subscription..." : "Your subscription has been activated."}
                 </div>
             )}
 
