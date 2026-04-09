@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         router.push("/login");
     }, [router]);
 
-    const fetchUser = useCallback(async () => {
+    const fetchUser = useCallback(async (retryCount = 0) => {
         try {
             // Add timestamp to prevent caching
             const response = await api.get(`/users/profile/?t=${new Date().getTime()}`);
@@ -45,6 +45,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Only logout on auth errors (401, 403), not on network errors
             const status = error.response?.status;
             if (status === 401 || status === 403) {
+                const token = localStorage.getItem("token");
+                if (token && retryCount < 1) {
+                    await new Promise((resolve) => setTimeout(resolve, 800));
+                    return fetchUser(retryCount + 1);
+                }
                 logout();
             }
         } finally {
