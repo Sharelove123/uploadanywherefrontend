@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import { Check, Loader2, Crown } from "lucide-react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ function SubscriptionContent() {
     const [plansError, setPlansError] = useState<string | null>(null);
     const searchParams = useSearchParams();
     const { user, checkAuth } = useAuth();
+    const refreshedAfterSuccess = useRef(false);
 
     useEffect(() => {
         // Get current plan from user profile
@@ -40,7 +41,8 @@ function SubscriptionContent() {
 
     // Refresh user profile on success (to get new plan)
     useEffect(() => {
-        if (searchParams.get('success')) {
+        if (searchParams.get('success') && !refreshedAfterSuccess.current) {
+            refreshedAfterSuccess.current = true;
             checkAuth();
         }
     }, [searchParams, checkAuth]);

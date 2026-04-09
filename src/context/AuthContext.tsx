@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import api, { setAuthToken } from "@/lib/api";
 import { useRouter, usePathname } from "next/navigation";
 
@@ -29,7 +29,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
 
-    const fetchUser = async () => {
+    const logout = useCallback(() => {
+        setAuthToken(""); // Clears token from api headers and localStorage
+        setUser(null);
+        router.push("/login");
+    }, [router]);
+
+    const fetchUser = useCallback(async () => {
         try {
             // Add timestamp to prevent caching
             const response = await api.get(`/users/profile/?t=${new Date().getTime()}`);
@@ -44,9 +50,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [logout]);
 
-    const checkAuth = async () => {
+    const checkAuth = useCallback(async () => {
         const token = localStorage.getItem("token");
         if (token) {
             setAuthToken(token);
@@ -55,23 +61,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(null);
             setIsLoading(false);
         }
-    };
+    }, [fetchUser]);
 
     useEffect(() => {
         checkAuth();
-    }, []);
+    }, [checkAuth]);
 
-    const login = async (token: string) => {
+    const login = useCallback(async (token: string) => {
         setAuthToken(token);
         await fetchUser();
         router.push("/dashboard");
-    };
-
-    const logout = () => {
-        setAuthToken(""); // Clears token from api headers and localStorage
-        setUser(null);
-        router.push("/login");
-    };
+    }, [fetchUser, router]);
 
     // Protected Route Logic
     useEffect(() => {
