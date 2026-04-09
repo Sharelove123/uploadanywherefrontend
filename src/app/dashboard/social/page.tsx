@@ -50,18 +50,21 @@ export default function SocialAccountsPage() {
             name: "LinkedIn",
             icon: Linkedin,
             description: "Post to your personal profile or company page.",
+            available: true,
         },
         {
             id: "twitter",
             name: "X (Twitter)",
             icon: Twitter,
-            description: "Post threads and long-form tweets.",
+            description: "Authentication is currently unavailable.",
+            available: false,
         },
         {
             id: "youtube",
             name: "YouTube",
             icon: Youtube,
-            description: "Post to Community tab (requires 500+ subs).",
+            description: "Authentication is currently unavailable.",
+            available: false,
         },
     ];
 
@@ -70,7 +73,7 @@ export default function SocialAccountsPage() {
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Social Accounts</h1>
                 <p className="text-muted-foreground">
-                    Manage your connected social media profiles.
+                    Only LinkedIn authentication is currently available.
                 </p>
             </div>
 
@@ -80,9 +83,19 @@ export default function SocialAccountsPage() {
                     const connectedAccount = connectedAccounts.find(a => a.platform === account.id);
                     const isConnected = !!connectedAccount;
                     const username = connectedAccount?.platform_username || "Not connected";
+                    const isAvailable = account.available;
 
                     return (
-                        <Card key={account.id} className={isConnected ? "border-primary/50 bg-primary/5" : ""}>
+                        <Card
+                            key={account.id}
+                            className={
+                                isConnected
+                                    ? "border-primary/50 bg-primary/5"
+                                    : !isAvailable
+                                        ? "border-dashed opacity-70"
+                                        : ""
+                            }
+                        >
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <div className="flex items-center gap-2">
                                     <account.icon className="h-5 w-5" />
@@ -90,6 +103,8 @@ export default function SocialAccountsPage() {
                                 </div>
                                 {isConnected ? (
                                     <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                ) : !isAvailable ? (
+                                    <AlertCircle className="h-5 w-5 text-amber-500" />
                                 ) : (
                                     <AlertCircle className="h-5 w-5 text-muted-foreground" />
                                 )}
@@ -104,6 +119,8 @@ export default function SocialAccountsPage() {
                                         <div className="text-sm font-medium">
                                             Connected as <span className="text-primary">{username}</span>
                                         </div>
+                                    ) : !isAvailable ? (
+                                        <div className="text-sm text-amber-600">Unavailable</div>
                                     ) : (
                                         <div className="text-sm text-muted-foreground">Not connected</div>
                                     )}
@@ -112,9 +129,9 @@ export default function SocialAccountsPage() {
                                         variant={isConnected ? "outline" : "default"}
                                         size="sm"
                                         onClick={() => isConnected ? handleDisconnect(account.id) : handleConnect(account.id)}
-                                        disabled={isLoading}
+                                        disabled={isLoading || !isAvailable}
                                     >
-                                        {isConnected ? "Disconnect" : "Connect"}
+                                        {isConnected ? "Disconnect" : isAvailable ? "Connect" : "Coming Soon"}
                                     </Button>
                                 </div>
                             </CardContent>
