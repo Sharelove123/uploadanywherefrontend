@@ -27,6 +27,7 @@ function SubscriptionContent() {
     const [currentPlan, setCurrentPlan] = useState<string>('free');
     const [isLoading, setIsLoading] = useState(true);
     const [isCheckoutLoading, setIsCheckoutLoading] = useState<number | null>(null);
+    const [plansError, setPlansError] = useState<string | null>(null);
     const searchParams = useSearchParams();
     const { user, checkAuth } = useAuth();
 
@@ -48,44 +49,17 @@ function SubscriptionContent() {
         // Fetch plans
         api.get('/payments/plans/')
             .then(res => {
-                // Use API data if available, otherwise use mock
                 if (res.data && res.data.length > 0) {
                     setPlans(res.data);
                 } else {
-                    // Mock plans if DB is empty for demo
-                    setPlans([
-                        {
-                            id: 1, name: 'free', display_name: 'Free', price_monthly: '0', price_yearly: '0',
-                            features: { repurposes: 2, brand_voices: 0, direct_posting: false }
-                        },
-                        {
-                            id: 2, name: 'pro', display_name: 'Pro', price_monthly: '19', price_yearly: '190',
-                            features: { repurposes: 50, brand_voices: 5, direct_posting: true }
-                        },
-                        {
-                            id: 3, name: 'agency', display_name: 'Agency', price_monthly: '59', price_yearly: '590',
-                            features: { repurposes: -1, brand_voices: -1, direct_posting: true }
-                        }
-                    ]);
+                    setPlans([]);
+                    setPlansError("No subscription plans are configured on the backend yet.");
                 }
             })
             .catch(err => {
                 console.error("Failed to fetch plans", err);
-                // Fallback mock plans on error
-                setPlans([
-                    {
-                        id: 1, name: 'free', display_name: 'Free', price_monthly: '0', price_yearly: '0',
-                        features: { repurposes: 2, brand_voices: 0, direct_posting: false }
-                    },
-                    {
-                        id: 2, name: 'pro', display_name: 'Pro', price_monthly: '19', price_yearly: '190',
-                        features: { repurposes: 50, brand_voices: 5, direct_posting: true }
-                    },
-                    {
-                        id: 3, name: 'agency', display_name: 'Agency', price_monthly: '59', price_yearly: '590',
-                        features: { repurposes: -1, brand_voices: -1, direct_posting: true }
-                    }
-                ]);
+                setPlans([]);
+                setPlansError("Failed to load subscription plans. Try again after the backend plans are configured.");
             })
             .finally(() => setIsLoading(false));
     }, []); // Empty dependency array - run only once on mount
@@ -130,19 +104,16 @@ function SubscriptionContent() {
                 )}
             </div>
 
-            {/* DEBUG INFO - REMOVE LATER */}
-            <div className="p-4 bg-gray-100 text-xs font-mono rounded border border-gray-300">
-                <p>DEBUG:</p>
-                <p>User Email: {user?.email}</p>
-                <p>User Tier: {user?.subscription_tier}</p>
-                <p>Current Plan State: {currentPlan}</p>
-                <p>Plan Comparison: {plans.map(p => `${p.name}: ${isCurrentPlan(p)}`).join(', ')}</p>
-            </div>
-
             {searchParams.get('success') && (
                 <div className="bg-green-500/10 text-green-600 p-4 rounded-md border border-green-500/20 mb-6 flex items-center gap-2">
                     <Check className="h-5 w-5" />
                     <strong>Success!</strong> Your subscription has been activated.
+                </div>
+            )}
+
+            {plansError && (
+                <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700">
+                    {plansError}
                 </div>
             )}
 
@@ -197,11 +168,11 @@ function SubscriptionContent() {
                             <Button
                                 className="w-full"
                                 variant={isCurrentPlan(plan) ? "secondary" : plan.name === 'pro' ? "default" : "outline"}
-                                disabled={isCheckoutLoading === plan.id || isCurrentPlan(plan)}
+                                disabled={isCheckoutLoading === plan.id || isCurrentPlan(plan) || plan.name === 'free'}
                                 onClick={() => handleUpgrade(plan)}
                             >
                                 {isCheckoutLoading === plan.id && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isCurrentPlan(plan) ? "Current Plan" : "Upgrade"}
+                                {isCurrentPlan(plan) ? "Current Plan" : plan.name === 'free' ? "Included" : "Upgrade"}
                             </Button>
                         </CardFooter>
                     </Card>
