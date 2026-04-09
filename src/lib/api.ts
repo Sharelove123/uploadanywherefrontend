@@ -9,7 +9,7 @@ const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    withCredentials: true, // Required for cookies/sessions across subdomains
+    withCredentials: false,
 });
 
 
